@@ -25,4 +25,4 @@ export default function(sizeInBytes, multiplier, decimalPrefix) {
     i++;
   }
   return Math.max(sizeInBytes, 0.1).toFixed(1) + ' ' + byteUnits[i];
-}
+};

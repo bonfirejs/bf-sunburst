@@ -1,44 +1,19 @@
 import Ember from 'ember';
-import d3 from 'bower_components/d3/d3';
-import stripFloat from 'addon/utils/strip-float';
-import bytesToReadableSize from 'addon/utils/bytes-to-readable-size';
-import uuid from 'addon/utils/uuid';
+import uuid from '../utils/uuid';
+import stripFloat from '../utils/strip-float';
 
 export default Ember.Component.extend({
   width: 750,
   height: 600,
-  units: 'SCUs',
-  dataSource: null,
-
-  isSizeDynamic: function() {
-    return this.get('dataSource.isSizeDynamic');
-  }.property('dataSource', 'dataSource.isSizeDynamic', 'dataSource.@each'),
-  sizeMultiplier: function() {
-    return this.get('dataSource.sizeMultiplier');
-  }.property('dataSource', 'dataSource.sizeMultiplier', 'dataSource.@each'),
+  units: 'units',
+  chartTitle: '',
+  chartDescription: '',
   legend: false,
   action: false,
-  gCustomId: function() {
-    return 'g' + this.get('elementId');
-  }.property(),
-
-  attributeBindings: ['getId:data-id'],
-  getId: function() {
-    return this.get('customId');
-  }.property('customId'),
-
+  dataSource: null,
   totalSize: 0,
-  chartTitle: 'SCU Metrics',
-  chartDescription: '',
-
-
-  explanationStyle: function() {
-    return 'width:'+this.get('width')+'px; height:'+this.get('height')+'px;';
-  }.property('width', 'height'),
-  percent: 15,
+  attributeBindings: ['getId:data-id'],
   classNames: ['inline-block'],
-
-  color: d3.scale.category20c(),
   colors: {
     "gray": "#D7D7D7",
     "light-green": "rgb(106, 185, 117)",
@@ -50,15 +25,27 @@ export default Ember.Component.extend({
     "red": "rgb(128, 21, 21)",
     "brown": "#4D3619"
   },
-
-  dataSourceExists: function () {
+  getId: Ember.computed('customId', function(){
+    return this.get('customId');
+  }),
+  isSizeDynamic: Ember.computed('dataSource', 'dataSource.isSizeDynamic', 'dataSource.@each', function() {
+    return this.get('dataSource.isSizeDynamic');
+  }),
+  sizeMultiplier: Ember.computed('dataSource', 'dataSource.sizeMultiplier', 'dataSource.@each', function(){
+    return this.get('dataSource.sizeMultiplier');
+  }),
+  gCustomId: Ember.computed(function() {
+    return 'g' + this.get('elementId');
+  }),
+  explanationStyle: Ember.computed('width', 'height', function() {
+    return 'width:' + this.get('width') + 'px; height:' + this.get('height') + 'px;';
+  }),
+  dataSourceExists: Ember.computed('dataSource.@each', 'dataSource', function() {
     return typeof this.get('dataSource') !== 'undefined' && this.get('dataSource') !== null;
-  }.property('dataSource.@each', 'dataSource'),
-
-  radius: function() {
+  }),
+  radius: Ember.computed('width', 'height', function() {
     return Math.min(this.get('width'), this.get('height')) / 2;
-  }.property('width', 'height'),
-
+  }),
   drawDetailSunburst: function(dataSource) {
     var percent = 25;
     var width = (percent / 100) * this.get('width');
@@ -66,7 +53,7 @@ export default Ember.Component.extend({
     var radius = Math.min(width, height) / 2;
 
     var self = this;
-    var vis = d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details').append("svg:svg")
+    var vis = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append("svg:svg")
     .attr("width", width)
     .attr("height", height)
     .append("g")
@@ -83,11 +70,11 @@ export default Ember.Component.extend({
       .innerRadius(function(d) { return Math.sqrt(d.y); })
       .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-    d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details').append("text")
+    d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append("text")
           .attr("r", radius)
           .style("opacity", 0);
 
-    var path = vis.data([dataSource]).selectAll('[data-id="'+self.get('customId')+'"] .sunburst-details path')
+    var path = vis.data([dataSource]).selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-details path')
       .data(partition.nodes)
       .enter().append("path")
       .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
@@ -103,17 +90,16 @@ export default Ember.Component.extend({
       .style("fill-rule", "evenodd")
       .style("opacity", 1);
 
-      dataSource.children.forEach( function(item, index, enumerable){
-        Ember.$('[data-id="'+self.get('customId')+'"] .sunburst-details').append('<div class="sunburst-details-item"> <div class="sunburst-details-swatch" style="background-color:'+self.get('colors')[item.fill_type]+';"> </div><span class="sunburst-details-label">' + item.name + ' ' + item.size + ' ' + self.get('units') + '</span></div>');
-      });
+    dataSource.children.forEach( function(item, index, enumerable){
+      Ember.$('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append('<div class="bf-sunburst-details-item"> <div class="bf-sunburst-details-swatch" style="background-color:'+self.get('colors')[item.fill_type]+';"> </div><span class="bf-sunburst-details-label">' + item.name + ' ' + item.size + ' ' + self.get('units') + '</span></div>');
+    });
   },
-
   draw: function() {
-    var isHovered = Ember.$('[data-id="'+this.get('customId')+'"] .sunburst-svg-container').is(":hover");
+    var isHovered = Ember.$('[data-id="'+this.get('customId')+'"] .bf-sunburst-svg-container:hover').length > 0;
     if (isHovered) { return; }
-    Ember.$('[data-id="'+this.get('customId')+'"] .sunburst-svg-container').empty();
+    Ember.$('[data-id="'+this.get('customId')+'"] .bf-sunburst-svg-container').empty();
     var self = this;
-    var vis = d3.select('[data-id="'+self.get('customId')+'"] .sunburst-svg-container').append("svg:svg")
+    var vis = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container').append("svg:svg")
     .attr("width", self.get('width'))
     .attr("height", self.get('height'))
     .append("g")
@@ -128,10 +114,10 @@ export default Ember.Component.extend({
       .endAngle(function(d) { return d.x + d.dx; })
       .innerRadius(function(d) { return Math.sqrt(d.y); })
       .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-    d3.select('[data-id="'+self.get('customId')+'"] .sunburst-svg-container').append("text")
+    d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container').append("text")
       .attr("r", self.get('radius'))
       .style("opacity", 0);
-    var path = vis.data([this.get('dataSource')]).selectAll('[data-id="'+self.get('customId')+'"] .sunburst-svg-container path')
+    var path = vis.data([this.get('dataSource')]).selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container path')
       .data(partition.nodes)
       .enter().append("path")
       .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
@@ -159,9 +145,9 @@ export default Ember.Component.extend({
           if (percentage < 0.1) {
             percentageString = "< 0.1%";
           }
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-percentage')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-percentage')
             .text(percentageString);
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-title')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-title')
             .text(d.name);
           if (self.get('isSizeDynamic')) {
             var readableSize = '';
@@ -170,20 +156,20 @@ export default Ember.Component.extend({
             } else {
               readableSize = bytesToReadableSize(d.size);
             }
-            d3.select('[data-id="'+self.get('customId')+'"] .sunburst-description')
+            d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-description')
             .text(readableSize);
           } else {
-            d3.select('[data-id="'+self.get('customId')+'"] .sunburst-description')
+            d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-description')
             .text(d.size + " " + self.get('units'));
           }
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-fill_type')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-fill_type')
             .text(d.description);
           //d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details')
 
           self.set('explanationStyle', 'visibility: visible; width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
 
           // Empty details
-          Ember.$('[data-id="'+self.get('customId')+'"] .sunburst-details').empty();
+          Ember.$('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').empty();
           // Draw Details
           if (typeof d.detailsChildren !== "undefined") {
             self.drawDetailSunburst(d.detailsChildren);
@@ -193,18 +179,18 @@ export default Ember.Component.extend({
           //updateBreadcrumbs(sequenceArray, percentageString);
 
           // Fade all the segments.
-          d3.selectAll('[data-id="'+self.get('customId')+'"] .sunburst-svg-container path')
+          d3.selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container path')
             .style("opacity", 0.3);
 
           // Then highlight only those that are an ancestor of the current segment.
-          vis.selectAll('[data-id="'+self.get("customId")+'"] .sunburst-svg-container path')
+          vis.selectAll('[data-id="'+self.get("customId")+'"] .bf-sunburst-svg-container path')
             .filter(function(node) {
               return (sequenceArray.indexOf(node) >= 0);
             })
             .style("opacity", 1);
 
           // Highlight event siblings
-          vis.selectAll('[data-id="'+self.get("customId")+'"] .sunburst-svg-container path')
+          vis.selectAll('[data-id="'+self.get("customId")+'"] .bf-sunburst-svg-container path')
             .filter(function(node) {
               return (node.eventSiblingId !== undefined && node.eventSiblingId === d.eventSiblingId);
             })
@@ -220,11 +206,11 @@ export default Ember.Component.extend({
             }
             if (!Ember.isEmpty(d.routeLabel)) {
               var widthOfTextContainer = (30 / 100) * self.get('width');
-              var d3SvgSelector = d3.select('[data-id="'+self.get('customId')+'"] .sunburst-link-container');
-              d3.select('[data-id="'+self.get("customId")+'"] .sunburst-link')
+              var d3SvgSelector = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-link-container');
+              d3.select('[data-id="'+self.get("customId")+'"] .bf-sunburst-link')
                 .text(d.routeLabel).call(svgTextEllipsis, d.routeLabel, widthOfTextContainer, d3SvgSelector);
             } else {
-              d3.select('[data-id="'+self.get("customId")+'"] .sunburst-link')
+              d3.select('[data-id="'+self.get("customId")+'"] .bf-sunburst-link')
               .text('');
             }
           }
@@ -257,13 +243,13 @@ export default Ember.Component.extend({
           //d3.select("#trail").style("visibility", "hidden");
 
           //Empty details
-          Ember.$("[data-id="+self.get('customId')+"] .sunburst-details").empty();
+          Ember.$("[data-id="+self.get('customId')+"] .bf-sunburst-details").empty();
 
           // Deactivate all segments during transition.
-          d3.selectAll('[data-id="'+self.get('customId')+'"] .sunburst-svg-container path').on("mouseover", null);
+          d3.selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container path').on("mouseover", null);
 
           // Transition each segment to full opacity and then reactivate it.
-          d3.selectAll('[data-id="'+self.get('customId')+'"] .sunburst-svg-container path')
+          d3.selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container path')
             .transition()
             .duration(500)
             .style("opacity", 1)
@@ -275,17 +261,17 @@ export default Ember.Component.extend({
           defaultExplanation();
       }
       function defaultExplanation() {
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-percentage')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-percentage')
             .text(self.get('chartTitle'));
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-title')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-title')
             .text('');
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-description')
-            .text("Hover to see details.");
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-fill_type')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-description')
+            .text(self.get('chartTitle'));
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-fill_type')
             .text('');
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-details')
           .text('');
-          d3.select('[data-id="'+self.get('customId')+'"] .sunburst-link')
+          d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-link')
           .text('');
           self.set('linkRoute', '');
           self.set('linkRouteId', '');
@@ -308,7 +294,7 @@ export default Ember.Component.extend({
           w: 75, h: 30, s: 3, r: 3
         };
 
-        var legend = d3.select('[data-id="'+self.get('customId')+'"] .sunburst-legend').append("svg:svg")
+        var legend = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-legend').append("svg:svg")
             .attr("width", li.w)
             .attr("height", d3.keys(self.get('colors')).length * (li.h + li.s));
 
@@ -333,13 +319,6 @@ export default Ember.Component.extend({
             .attr("text-anchor", "middle")
             .text(function(d) { return d.key; });
       }
-
-
-      /* TODO: Finish dynamic generation of legend instead of having to pass in a legend array.
-      var unique = self.get('dataSource').children.map(function(obj) { return obj.name; });
-      unique = unique.filter(function(v,i) { return ages.indexOf(v) == i; });
-      */
-
       if (self.get('legend')) { drawLegend(); }
   },
   actions: {
@@ -347,18 +326,15 @@ export default Ember.Component.extend({
       this.sendAction('action', route, routeId);
     }
   },
-
-  customStyle: function() {
+  customStyle: Ember.computed('width', 'height', function() {
     return 'width:'+this.get('width')+'px; height:'+this.get('height')+'px;';
-  }.property('width', 'height'),
-
-  dataSourceObserver: function() {
+  }),
+  dataSourceObserver: Ember.observer('dataSource.@each', 'dataSource.isSizeDynamic', function() {
     if (!Ember.isEmpty(this.get('dataSource.units'))) {
       this.set('units', this.get('dataSource.units'));
     }
     this.draw();
-  }.observes('dataSource.@each', 'dataSource.isSizeDynamic'),
-
+  }),
   didInsertElement: function() {
     this.set('gCustomId', uuid());
     this.draw();
