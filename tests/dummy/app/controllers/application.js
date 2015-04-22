@@ -8,6 +8,11 @@ export default Ember.Controller.extend({
         "name": "Compute",
         "fill_type": "dark-green",
         "size": 50
+      },
+      {
+        "name": "Test",
+        "fill_type": "light-green",
+        "size": 20
       }
     ]
   }
