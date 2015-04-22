@@ -3,8 +3,8 @@ import uuid from '../utils/uuid';
 import stripFloat from '../utils/strip-float';
 
 export default Ember.Component.extend({
-  width: 750,
-  height: 600,
+  width: 0,
+  height: 0,
   units: 'units',
   chartTitle: '',
   chartDescription: '',
@@ -38,7 +38,10 @@ export default Ember.Component.extend({
     return 'g' + this.get('elementId');
   }),
   explanationStyle: Ember.computed('width', 'height', function() {
-    return 'width:' + this.get('width') + 'px; height:' + this.get('height') + 'px;';
+    return 'width:100%; height:100%';
+  }),
+  customStyle: Ember.computed('width', 'height', function() {
+    return 'width:100%; height:100%';
   }),
   dataSourceExists: Ember.computed('dataSource.@each', 'dataSource', function() {
     return typeof this.get('dataSource') !== 'undefined' && this.get('dataSource') !== null;
@@ -166,7 +169,8 @@ export default Ember.Component.extend({
             .text(d.description);
           //d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details')
 
-          self.set('explanationStyle', 'visibility: visible; width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
+          //self.set('explanationStyle', 'visibility: visible; width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
+          self.set('explanationStyle', 'visibility: visible; width:100%; height:100%');
 
           // Empty details
           Ember.$('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').empty();
@@ -257,7 +261,8 @@ export default Ember.Component.extend({
               d3.select(this).on("mouseover", mouseover);
             });
 
-          self.set('explanationStyle', 'width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
+          //self.set('explanationStyle', 'width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
+          self.set('explanationStyle', 'visibility: visible; width:100%; height:100%');
           defaultExplanation();
       }
       function defaultExplanation() {
@@ -326,9 +331,6 @@ export default Ember.Component.extend({
       this.sendAction('action', route, routeId);
     }
   },
-  customStyle: Ember.computed('width', 'height', function() {
-    return 'width:'+this.get('width')+'px; height:'+this.get('height')+'px;';
-  }),
   dataSourceObserver: Ember.observer('dataSource.@each', 'dataSource.isSizeDynamic', function() {
     if (!Ember.isEmpty(this.get('dataSource.units'))) {
       this.set('units', this.get('dataSource.units'));
@@ -336,6 +338,8 @@ export default Ember.Component.extend({
     this.draw();
   }),
   didInsertElement: function() {
+    this.set('width', parseInt(this.$().css('width').replace('px', '')));
+    this.set('height', parseInt(this.$().css('width').replace('px', '')));
     this.set('gCustomId', uuid());
     this.draw();
   },
