@@ -103,8 +103,8 @@ export default Ember.Component.extend({
     Ember.$('[data-id="'+this.get('customId')+'"] .bf-sunburst-svg-container').empty();
     var self = this;
     var vis = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container').append("svg:svg")
-    .attr("width", self.get('width'))
-    .attr("height", self.get('height'))
+    .attr("width", "100%")
+    .attr('viewBox', '0 0 300 300')
     .append("g")
     .attr("id", self.get('gCustomId'))
     .attr("transform", "translate(" + self.get('width') / 2 + "," + self.get('height') / 2 + ")");
