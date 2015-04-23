@@ -49,54 +49,6 @@ export default Ember.Component.extend({
   radius: Ember.computed('width', 'height', function() {
     return Math.min(this.get('width'), this.get('height')) / 2;
   }),
-  drawDetailSunburst: function(dataSource) {
-    var percent = 25;
-    var width = (percent / 100) * this.get('width');
-    var height = (percent / 100) * this.get('height');
-    var radius = Math.min(width, height) / 2;
-
-    var self = this;
-    var vis = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append("svg:svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("id", self.get('gCustomId') + 'details')
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-    var partition = d3.layout.partition()
-      .sort(null)
-      .size([2 * Math.PI, radius * radius])
-      .value(function(d) { return d.size; });
-
-    var arc = d3.svg.arc().startAngle(function(d) { return d.x; })
-      .endAngle(function(d) { return d.x + d.dx; })
-      .innerRadius(function(d) { return Math.sqrt(d.y); })
-      .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-
-    d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append("text")
-          .attr("r", radius)
-          .style("opacity", 0);
-
-    var path = vis.data([dataSource]).selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-details path')
-      .data(partition.nodes)
-      .enter().append("path")
-      .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-      .attr("d", arc)
-      .style("stroke", "#fff")
-      .style("fill", function(d) {
-        if (d.fill_type) {
-          return self.get('colors')[d.fill_type];
-        } else {
-          return d3.scale.category20c(((d.children ? d : d.parent).name));
-        }
-      })
-      .style("fill-rule", "evenodd")
-      .style("opacity", 1);
-
-    dataSource.children.forEach( function(item, index, enumerable){
-      Ember.$('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').append('<div class="bf-sunburst-details-item"> <div class="bf-sunburst-details-swatch" style="background-color:'+self.get('colors')[item.fill_type]+';"> </div><span class="bf-sunburst-details-label">' + item.name + ' ' + item.size + ' ' + self.get('units') + '</span></div>');
-    });
-  },
   draw: function() {
     var isHovered = Ember.$('[data-id="'+this.get('customId')+'"] .bf-sunburst-svg-container:hover').length > 0;
     if (isHovered) { return; }
@@ -174,10 +126,6 @@ export default Ember.Component.extend({
 
           // Empty details
           Ember.$('[data-id="'+self.get('customId')+'"] .bf-sunburst-details').empty();
-          // Draw Details
-          if (typeof d.detailsChildren !== "undefined") {
-            self.drawDetailSunburst(d.detailsChildren);
-          }
 
           var sequenceArray = getAncestors(d);
           //updateBreadcrumbs(sequenceArray, percentageString);
