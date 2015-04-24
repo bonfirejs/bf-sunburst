@@ -54,24 +54,28 @@ export default Ember.Component.extend({
     if (isHovered) { return; }
     Ember.$('[data-id="'+this.get('customId')+'"] .bf-sunburst-svg-container').empty();
     var self = this;
+
     var vis = d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container').append("svg:svg")
     .attr("width", "100%")
-    .attr('viewBox', '0 0 300 300')
+    .attr('viewBox', '-24 -25 350 350')
     .append("g")
     .attr("id", self.get('gCustomId'))
     .attr("transform", "translate(" + self.get('width') / 2 + "," + self.get('height') / 2 + ")");
+
     var partition = d3.layout.partition()
-      .sort(null)
-      .size([2 * Math.PI, self.get('radius') * self.get('radius')])
-      .value(function(d) { return d.size; });
+    .size([2 * Math.PI, 100])
+    .value(function(d) { return d.size; });
+
     var arc = d3.svg.arc()
       .startAngle(function(d) { return d.x; })
       .endAngle(function(d) { return d.x + d.dx; })
-      .innerRadius(function(d) { return Math.sqrt(d.y); })
-      .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+      .innerRadius(function(d) { return self.get('radius') * Math.sqrt(d.y + 20)  / 10; })
+      .outerRadius(function(d) { return self.get('radius') * Math.sqrt((d.y + d.dy) + 20)  / 10; });
+
     d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container').append("text")
       .attr("r", self.get('radius'))
       .style("opacity", 0);
+
     var path = vis.data([this.get('dataSource')]).selectAll('[data-id="'+self.get('customId')+'"] .bf-sunburst-svg-container path')
       .data(partition.nodes)
       .enter().append("path")
@@ -119,9 +123,7 @@ export default Ember.Component.extend({
           }
           d3.select('[data-id="'+self.get('customId')+'"] .bf-sunburst-fill_type')
             .text(d.description);
-          //d3.select('[data-id="'+self.get('customId')+'"] .sunburst-details')
 
-          //self.set('explanationStyle', 'visibility: visible; width:'+self.get('width')+'px; height:'+self.get('height')+'px;');
           self.set('explanationStyle', 'visibility: visible; width:100%; height:100%');
 
           // Empty details
