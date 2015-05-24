@@ -32,7 +32,13 @@ export default Ember.Controller.extend({
                         children: [
                           {
                             name: "Local",
-                            size: 25
+                            size: 25,
+                            children:[
+                              {
+                                name: "Home",
+                                size: 25
+                              }
+                            ]
                           }
                         ]
                       }

@@ -22,13 +22,13 @@
 }
 
 .bf-sunburst-percentage {
-  font-size: 2.5em;
+  /* font-size: 2.5em; */
   margin:6px;
 }
 
 .bf-sunburst-description {
-  text-align: center;
-  font-weight: 700;
+  /* text-align: center;
+  font-weight: 700; */
 }
 
 .bf-sunburst-svg-container {
