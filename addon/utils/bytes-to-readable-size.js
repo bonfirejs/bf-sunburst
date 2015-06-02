@@ -9,13 +9,13 @@ import Ember from 'ember';
   @return {string} A human-readable string or null if not processable
 */
 export default function(sizeInBytes, multiplier, decimalPrefix) {
-  if (Ember.isEmpty(sizeInBytes) || sizeInBytes < 0) return null;
-  if (typeof sizeInBytes !== 'number') sizeInBytes = parseInt(sizeInBytes);
-  if (isNaN(sizeInBytes)) return null;
+  if (Ember.isEmpty(sizeInBytes) || sizeInBytes < 0) { return null; }
+  if (typeof sizeInBytes !== 'number') { sizeInBytes = parseInt(sizeInBytes); }
+  if (isNaN(sizeInBytes)) { return null; }
   if (multiplier !== undefined) {
     sizeInBytes = sizeInBytes * multiplier;
   }
-  if (sizeInBytes === 0) return '0';
+  if (sizeInBytes === 0) { return '0'; }
   // Default to binary/IEC prefixes rather than decimal/SI prefixes
   var byteUnits = (decimalPrefix) ? ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
   var power = (decimalPrefix) ? 1000 : 1024;
@@ -25,4 +25,4 @@ export default function(sizeInBytes, multiplier, decimalPrefix) {
     i++;
   }
   return Math.max(sizeInBytes, 0.1).toFixed(1) + ' ' + byteUnits[i];
-};
+}

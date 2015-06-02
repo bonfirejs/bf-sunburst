@@ -1,18 +1,7 @@
-<h2 id="title">Welcome to Ember.js: Bonfire Sunburst</h2>
+<h2 id="title">Bonfire Sunburst</h2>
 
-<div style="width:300px; border:1px solid red; resize: both;">
-  {{#bf-sunburst dataSource=exampleDataSource}}
-      <text>
-        <tspan x="10" class="bf-sunburst-title" text-anchor="middle" font-size="14"></tspan><tspan x="10" dy="22" text-anchor="middle" font-size="18" class="bf-sunburst-percentage"></tspan><tspan x="10" dy="16" text-anchor="middle" font-size="10" class="bf-sunburst-description"></tspan>
-      </text>
-      {{!--
-      <a {{action "changeRoute" linkRoute linkRouteId}}>
-        <text x="0" y="15" text-anchor="middle" class="bf-sunburst-link">
-          {{linkRouteLabel}}
-        </text>
-      </a>
-      --}}
-  {{/bf-sunburst}}
+<div style="width:400px">
+  {{bf-sunburst data=exampleDataSource}}
 </div>
 
 {{outlet}}
