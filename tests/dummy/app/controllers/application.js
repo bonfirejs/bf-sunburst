@@ -12,12 +12,42 @@ export default Ember.Controller.extend({
         route: "vmsVm",
         routeId: 's3h5kj2j3k1k84',
         routeLabel: 'Trees Resource',
+
         children: [
           {
             name: "Oak",
             description: "Trees",
             size: 25,
-
+            children: [
+              {
+                name: "Eastern Oak",
+                size: 25,
+                children: [
+                  {
+                    name: "Biological",
+                    size: 25,
+                    children: [
+                      {
+                        name: "Regional",
+                        size: 25,
+                        children: [
+                          {
+                            name: "Local",
+                            size: 25,
+                            children:[
+                              {
+                                name: "Home",
+                                size: 25
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           },
           {
             name: "Chestnut",
@@ -25,6 +55,7 @@ export default Ember.Controller.extend({
             size: 25
           }
         ]
+
       },
       {
         name: "Shrubs",

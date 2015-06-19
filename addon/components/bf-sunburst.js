@@ -5,7 +5,7 @@ import stripFloat from '../utils/strip-float';
 
 export default Ember.Component.extend({
   width: 100,
-  centerOuterRadius: 16,
+  centerOuterRadius: 28,
   sizeAdjustment: 2000,
   classNames: ['bf-sunburst-container'],
   radius: Ember.computed(function(){
@@ -19,6 +19,7 @@ export default Ember.Component.extend({
     this.appendPath(pathAndTextGroup);
     this.appendText(pathAndTextGroup);
     this.set('totalSize', pathAndTextGroup.node().__data__.value);
+    this.set('centerPathWidth', d3.select('#bf-sunburst-center-path').node().getBBox().width);
   },
   sunburstContainer: Ember.computed(function(){
     return d3.select('#' + this.get('elementId')).append('svg:svg')
@@ -36,7 +37,7 @@ export default Ember.Component.extend({
       .startAngle(function(d) { return d.x; })
       .endAngle(function(d) { return d.x + d.dx; })
       .innerRadius(function(d) { return Math.sqrt(d.y); })
-      .outerRadius(function(d) { return (d.depth === 0) ? self.get('centerOuterRadius') : Math.sqrt(d.y + d.dy); });
+      .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
   }),
   appendPath: function(group){
     var mouseOverPath = this.mouseOverPath;
@@ -44,6 +45,11 @@ export default Ember.Component.extend({
     return group.append("path")
       .attr("d", this.get('arc'))
       //.attr('class', function(d) { return d.depth; })
+      .attr('id', function(d){
+        if (d.depth === 0) {
+          return 'bf-sunburst-center-path';
+        }
+      })
       .style("stroke", "#fff")
       .style("fill", function(d) {
         if (d.depth === 0) {
@@ -55,7 +61,6 @@ export default Ember.Component.extend({
       }, true)
   },
   appendText: function(group) {
-    console.log('appendText');
     return group.append('text')
       .attr('class', function(d) { return 'path-text-' + d.depth; })
       .text(function(d) {
@@ -63,7 +68,7 @@ export default Ember.Component.extend({
           //return d.name;
         }
       })
-      //.attr('font-size', '.3em')
+      //.attr('font-size', '1em')
       .attr('text-anchor', 'middle');
   },
   appendTspan: function(textContainer, text, attributes){
@@ -74,16 +79,17 @@ export default Ember.Component.extend({
      });
   },
   mouseOverPath: function(d, i) {
+    var self = this;
     var percentage = 100 * d.value / this.get('totalSize');
     var percentageString = (percentage < 0.1) ? '< 0.1%' : stripFloat(percentage) + '%';
+
     d3.select('.path-text-0').selectAll('*').remove(); // clean up
     this.appendTspan(d3.select('.path-text-0'), d.name, {
       x: 0,
       dy: -4,
-      'font-size': '.31em',
-      'font-family': 'Helvetica,Arial,sans-serif'
+      'font-size': this.get('centerPathWidth') / 6,
+      'font-family': 'Open Sans'
     });
-    //this.appendTspan();
   },
   didInsertElement: function() {
     this.draw();
