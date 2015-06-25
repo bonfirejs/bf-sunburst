@@ -6,7 +6,18 @@
 }
 
 .bf-sunburst-container svg {
-    position:absolute;
-    width: 100%;
-    height: 100%;
+  position:absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.bf-sunburst-percentage {
+  fill: #000;
+  font-family: 'Open Sans';
+}
+
+.bf-sunburst-title {
+  fill: #000;
+  font-family: 'Open Sans';
+  font-weight: 800;
 }

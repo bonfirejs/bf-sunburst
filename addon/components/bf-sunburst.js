@@ -86,9 +86,15 @@ export default Ember.Component.extend({
     d3.select('.path-text-0').selectAll('*').remove(); // clean up
     this.appendTspan(d3.select('.path-text-0'), d.name, {
       x: 0,
-      dy: -4,
+      dy: -Math.abs(this.get('centerPathWidth') / 10),
+      'font-size': this.get('centerPathWidth') / 10,
+      'class': 'bf-sunburst-title'
+    });
+    this.appendTspan(d3.select('.path-text-0'), percentageString, {
+      x: 0,
+      dy: this.get('centerPathWidth') / 4.5,
       'font-size': this.get('centerPathWidth') / 6,
-      'font-family': 'Open Sans'
+      'class': 'bf-sunburst-percentage'
     });
   },
   didInsertElement: function() {
